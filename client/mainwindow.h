@@ -1,13 +1,8 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
-
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class MainWindow;
-}
-QT_END_NAMESPACE
+#include <QPushButton>
+#include "client.h"
 
 class MainWindow : public QMainWindow
 {
@@ -17,7 +12,12 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void toggleEraseMode();
+    void clearCanvas();
+
 private:
-    Ui::MainWindow *ui;
+    Client *clientWidget;
+    QPushButton *eraseButton;
+    QPushButton *clearButton;
 };
-#endif // MAINWINDOW_H
