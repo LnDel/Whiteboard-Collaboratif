@@ -6,7 +6,10 @@
 #include <QTcpSocket>
 #include <QUdpSocket>
 #include <QMap>
+#include <QVector>
+#include <QLine>
 
+// Structure pour stocker les informations sur les clients
 struct ClientInfo {
     QTcpSocket *tcpSocket;
     QHostAddress udpAddress;
@@ -33,10 +36,13 @@ private:
     QTcpServer *tcpServer;
     QUdpSocket *udpSocket;
     QMap<int, ClientInfo> clients;
+    QVector<QLine> whiteboard;
     int nextClientId;
 
     void broadcastClientList();
     void broadcastUdpMessage(const QByteArray &message);
+    void sendCurrentWhiteboardToClient(int clientId);
+    void updateWhiteboardAndBroadcast(const QVector<QLine> &newDrawing);
 };
 
 #endif // SERVER_H
