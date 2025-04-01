@@ -1,22 +1,22 @@
-#pragma once
+#ifndef CLIENT_H
+#define CLIENT_H
 
 #include <QWidget>
-#include <QPainter>
-#include <QPen>
-#include <QMouseEvent>
+#include <QTcpSocket>
+#include <QUdpSocket>
 #include <QVector>
 #include <QLine>
+#include <QMouseEvent>
+#include <QPainter>
 
-class Client : public QWidget
-{
+class Client : public QWidget {
     Q_OBJECT
 
 public:
-    explicit Client(QWidget *parent = nullptr);
+    Client(QWidget *parent = nullptr);
     ~Client();
-
-    void clearCanvas();
     void setEraseMode(bool erase);
+    void clearCanvas();
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -24,13 +24,22 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
 
+private slots:
+    void connectToServer();
+    void handleTcpMessage();
+    void handleUdpMessage();
+
 private:
-    QPoint lastPoint;
-    QVector<QLine> lines;
     bool drawing;
     bool eraseMode;
-    float mouseX;
-    float mouseY;
     bool mousePressed;
-    int penWidth;
+    int mouseX, mouseY;
+    QPoint lastPoint;
+    QVector<QLine> lines;
+
+    QTcpSocket *tcpSocket;
+    QUdpSocket *udpSocket;
+    quint16 udpPort;
 };
+
+#endif // CLIENT_H

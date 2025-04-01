@@ -7,11 +7,13 @@ WhiteboardServer::WhiteboardServer(QObject *parent)
     : QObject(parent), nextClientId(1) {
     tcpServer = new QTcpServer(this);
     udpSocket = new QUdpSocket(this);
+    qDebug() << "Serveur initialisé.";
 }
 
 WhiteboardServer::~WhiteboardServer() {
     delete tcpServer;
     delete udpSocket;
+    qDebug() << "Serveur arrêté.";
 }
 
 void WhiteboardServer::startServer(quint16 tcpPort, quint16 udpPort) {
@@ -75,6 +77,8 @@ void WhiteboardServer::handleClientMessage() {
     QString messageType;
     in >> messageType;
 
+    qDebug() << "Message TCP reçu de client" << clientId << ":" << messageType;
+
     if (messageType == "SYNC") {
         QString udpAddress;
         quint16 udpPort;
@@ -83,11 +87,13 @@ void WhiteboardServer::handleClientMessage() {
         clients[clientId].udpAddress = QHostAddress(udpAddress);
         clients[clientId].udpPort = udpPort;
 
-        qDebug() << "Client" << clientId << "synchronisé sur UDP";
+        qDebug() << "Client" << clientId << "synchronisé sur UDP avec adresse" << udpAddress << "et port" << udpPort;
     }
     else if (messageType == "DRAW") {
         QVector<QLine> newDrawing;
         in >> newDrawing;
+
+        qDebug() << "Nouveau dessin reçu de client" << clientId << "avec" << newDrawing.size() << "lignes.";
 
         updateWhiteboardAndBroadcast(newDrawing);
     }
@@ -120,6 +126,7 @@ void WhiteboardServer::broadcastClientList() {
     for (auto &client : clients) {
         client.tcpSocket->write(data);
     }
+    qDebug() << "Liste des clients diffusée.";
 }
 
 void WhiteboardServer::handleUdpMessage() {
@@ -140,6 +147,8 @@ void WhiteboardServer::handleUdpMessage() {
         }
         if (senderId == -1) continue;
 
+        qDebug() << "Message UDP reçu de client" << senderId;
+
         broadcastUdpMessage(datagram);
     }
 }
@@ -151,10 +160,12 @@ void WhiteboardServer::broadcastUdpMessage(const QByteArray &message) {
 
         udpSocket->writeDatagram(message, client.udpAddress, client.udpPort);
     }
+    qDebug() << "Message UDP diffusé à tous les clients.";
 }
 
 void WhiteboardServer::sendCurrentWhiteboardToClient(int clientId) {
-    // Envoyer le tableau blanc complet à ce client
+    qDebug() << "Envoi du tableau blanc actuel au client" << clientId;
+
     QByteArray data;
     QDataStream out(&data, QIODevice::WriteOnly);
     out << QString("WHITEBOARD") << whiteboard;
